@@ -47,10 +47,9 @@ create table shop.product (
     foreign key (size_id) references size(size_id)
 )
 ```
-- `product_id` is an integer
-- `identity` means `product_id` will auto increment by 1, starting from 1 when a new row is inserted
-- `primary key` means `product_id` is unique and not null
-- `size_id` is a `foreign key`, referencing to another table, in this case `size` table, and its `size_id` column (this table doesnt exist yet)
+- `identity` will auto increment by 1, starting from 1 when a new row is inserted
+- `primary key` means unique and not null
+- `size_id` is a `foreign key`
 - the last statement is the foreign key `constraint`, which means `size_id` in `product` table must exist in `size` table
 
 <br> the objects selection chain is `database.schema.object`
@@ -100,7 +99,6 @@ from shop.product
 ```
 
 ## Updating data
-- Update a single row
 ``` sql
 update shop.product
 set price = 100.00
@@ -108,12 +106,10 @@ where product_id = 1
 ```
 
 ## Deleting data
-- Delete a single row
 ``` sql
 delete from shop.product
 where product_id = 1
 ```
-- truncate table (delete all rows and reset identity)
 ``` sql
 truncate table shop.product
 ```
@@ -128,6 +124,52 @@ declare @tmp_table table (product_id int, price decimal(10,2))
 ```
 
 ## Case statement
+```sql
+case when @insert = 1 and @delete = 0 then 'insert'
+    when @insert = 0 and @delete = 1 then 'delete'
+    when @insert = 1 and @delete = 1 then 'update'
+else 'none' end as event
+```
+
+## CTE
+``` sql
+with cte as (
+    select product_id,
+    size_id, 
+    sum(price) over(partition by size_id order by price) as total_price
+    from shop.product
+)
+
+select * from cte
+where total_price > 100
+```
+
+## Functions
+``` sql
+select 
+count(*)
+max(price)
+min(price)
+avg(distinct price)
+sum(price)
+from shop.product
+
+select 
+row_number() over(order by price) as row_number, -- 1,2,3,4,5
+rank() over(order by price) as rank, -- 1,2,2,4,5
+dense_rank() over(order by price) as dense_rank -- 1,2,2,3,4
+    to do: rank() over(order by price preceeding 1 following 4) as rank
+
+lead(price) over(order by price) as next_price, -- next row
+lag(price) over(order by price) as previous_price -- previous row
+first_value(price) over(order by price) as first_price, -- first row
+last_value(price) over(order by price) as last_price -- last row
+
+ntile(4) over(order by price) as quartile -- 1,2,3,4
+percent_rank() over(order by price) as percentile -- 0.0, 0.25, 0.5, 0.75, 1.0
+cume_dist() over(order by price) as cumulative_distribution -- 0.0, 0.25, 0.5, 0.75, 1.0
+from shop.product
+```
 
 
 
