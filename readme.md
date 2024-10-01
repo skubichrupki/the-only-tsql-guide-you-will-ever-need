@@ -3,8 +3,10 @@
 - [About](#About)
 - [Data Types](#Data-Types)
 - [Creating SQL objects](#Creating-SQL-objects)
-- [Inserting data](#Inserting-data)
+- [CRUD](#Selecting-data)
 - [SQL Functions](#Aggregate-Functions)
+- [Dynamic SQL](#Dynamic-SQL)
+- [Transactions](#Transactions)
 
 ## Data Types
 ``` sql
@@ -173,15 +175,12 @@ declare @table_name = 'product' -- no need for single quotes
 declare @file_path = 'C:\Users\user\Documents\product.csv' -- need single quotes
 
 declare @sql nvarchar(max)
-set @sql = 'bulk insert etl.' + @table_name + ' from ''' + @file_path + ''' with (datasource = "etluri",
-firstrow = 2,
-codepage = "65001",
-fieldterminator = ",",
-rowterminator = "\n")'
+set @sql = 'bulk insert etl.' + @table_name + ' from ''' + @file_path + ''''
 
 -- result: bulk insert etl.product from 'C:\Users\user\Documents\product.csv'
 
 -- for 'uri' in dynamic sql: ' ends string, '' single quote, variable, '' single quote, ' starts string
+-- bulk means insert data from a file
 
 exec sp_executesql @sql
 ```
