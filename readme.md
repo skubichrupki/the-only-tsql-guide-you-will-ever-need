@@ -30,19 +30,15 @@ create schema shop
 ```
 ``` sql 
 create table shop.product (
-    product_id int identity(1,1) primary key,
+    product_id int identity(1,1) primary key, -- auto increment by 1, starting from 1, unique and not null
     name nvarchar(50),
     price decimal(10,2),
     quantity int,
-    size_id int
+    size_id int -- foreign key
 
-    foreign key (size_id) references size(size_id)
+    foreign key (size_id) references size(size_id) -- foreign key `constraint`, `size_id` in `product` table must exist in `size` table
 )
 ```
-- `identity` will auto increment by 1, starting from 1 when a new row is inserted
-- `primary key` means unique and not null
-- `size_id` is a `foreign key`
-- the last statement is the foreign key `constraint`, which means `size_id` in `product` table must exist in `size` table
 
 <br> the objects selection chain is `database.schema.object`
 ``` sql
