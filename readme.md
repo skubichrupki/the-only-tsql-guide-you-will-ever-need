@@ -7,24 +7,16 @@
 
 ## Data Types
 ``` sql
-- product_id int
-- price decimal(10,2)
-- name nvarchar(50)
+- product_id int -- whole number
+- price decimal(10,2) -- decimal number with 10 digits and 2 of them are after the decimal point
+- name nvarchar(50) -- string, maximum length of 50 characters
 - release_date datetime, datetime2, date, time
-- is_archived bit
-- uuid uniqueidentifier
-- price money 
+- is_archived bit --  can be 0 or 1
+- uuid uniqueidentifier -- (GUID) like 123e4567-e89b-12d3-a456-426614174000
+- price money -- $123.45
 - table
-- cursor
+- cursor -- iterates through a result set
 ```
-- `product_id` is a whole number
-- `price` is a decimal number with 10 digits and 2 of them are after the decimal point
-- `name` is a unicode string, with a maximum length of 50 characters
-- `release_date` is a date and time value
-- `is_archived` is a bit, which can be 0 or 1
-- `uuid` is a unique identifier (GUID) like 123e4567-e89b-12d3-a456-426614174000
-- `price` is a money data type, which is a currency value like $123.45
-- `cursor` iterates through a result set
 
 ## Creating SQL objects
 ``` sql 
