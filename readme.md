@@ -4,10 +4,11 @@
 - [Data Types](#Data-Types)
 - [Creating SQL objects](#Creating-SQL-objects)
 - [Inserting data](#Inserting-data)
+- [SQL Functions](#Aggregate-Functions)
 
 ## Data Types
 ``` sql
-- product_id int -- whole number
+- product_id int, bigint, smallint, tinyint -- whole number
 - price decimal(10,2) -- decimal number with 10 digits and 2 of them are after the decimal point
 - name nvarchar(50) -- string, maximum length of 50 characters
 - release_date datetime, datetime2, date, time
@@ -21,11 +22,9 @@
 ## Creating SQL objects
 ``` sql 
 create database hatelovewear
-```
-``` sql 
+
 use hatelovewear
-```
-``` sql
+
 create schema shop
 ```
 ``` sql 
@@ -40,19 +39,10 @@ create table shop.product (
 )
 ```
 
-<br> the objects selection chain is `database.schema.object`
-``` sql
-hatelovewear.shop.product
-```
-
 ## Dropping SQL objects
 ``` sql
 drop table shop.product
-```
-``` sql
 drop schema shop
-```
-``` sql
 drop database hatelovewear
 ```
 
@@ -99,7 +89,7 @@ delete from shop.product
 where product_id = 1
 ```
 ``` sql
-truncate table shop.product
+truncate table shop.product -- reset identity column
 ```
 
 ## Variables
@@ -132,7 +122,7 @@ select * from cte
 where total_price > 100
 ```
 
-## Functions
+## Aggregate Functions
 ``` sql
 select 
 count(*)
@@ -140,7 +130,7 @@ max(price)
 min(price)
 avg(distinct price)
 sum(price)
-from shop.product
+from shop.product -- each can be a window function
 ```
 
 ## Window Functions
@@ -149,7 +139,9 @@ select
 row_number() over(order by price) as row_number, -- 1,2,3,4,5
 rank() over(order by price) as rank, -- 1,2,2,4,5
 dense_rank() over(order by price) as dense_rank -- 1,2,2,3,4
-    to do: rank() over(order by price preceeding 1 following 4) as rank
+
+sum() over(order by price rows between 3 preceeding and current row) as rank -- 3 previous rows and current row
+sum() over(order by price rows between 3 preceeding and 1 following) as rank -- 3 previous rows up to 1 next row
 
 lead(price) over(order by price) as next_price, -- next row
 lag(price) over(order by price) as previous_price -- previous row
@@ -158,13 +150,96 @@ last_value(price) over(order by price) as last_price -- last row
 
 ntile(4) over(order by price) as quartile -- 1,2,3,4
 percent_rank() over(order by price) as percentile -- 0.0, 0.25, 0.5, 0.75, 1.0
-cume_dist() over(order by price) as cumulative_distribution -- 0.0, 0.25, 0.5, 0.75, 1.0
+cume_dist() over(order by price) as cumulative_distribution -- 0.0, 0.25, 0.5...
 from shop.product
 ```
 
+## Merge
+``` sql
+merge shop.product as target -- target table
+using stage.product as source -- source table 
+on target.product_id = source.product_id -- join condition
+when matched then -- update target row with source data 
+update
+set target.product_name = source.product_name
+when not matched then -- insert source row into target table
+insert (product_id, product_name)
+values (source.product_id, source.product_name); 
+```
 
+## Dynamic SQL
+``` sql
+declare @table_name = 'product' -- no need for single quotes
+declare @file_path = 'C:\Users\user\Documents\product.csv' -- need single quotes
 
+declare @sql nvarchar(max)
+set @sql = 'bulk insert etl.' + @table_name + ' from ''' + @file_path + ''' with (datasource = "etluri",
+firstrow = 2,
+codepage = "65001",
+fieldterminator = ",",
+rowterminator = "\n")'
 
+-- result: bulk insert etl.product from 'C:\Users\user\Documents\product.csv'
 
+-- for 'uri' in dynamic sql: ' ends string, '' single quote, variable, '' single quote, ' starts string
 
+exec sp_executesql @sql
+```
 
+## Transactions
+- commit transaction: save changes
+``` sql
+begin transaction
+
+update shop.product
+set price = 100.00
+where product_id = 1
+
+select @@trancount -- 1
+commit transaction
+select @@trancount -- 0
+```
+- rollback transaction: undo changes
+``` sql
+begin transaction
+
+update shop.product
+set price = 100.00
+where product_id = 1
+
+select @@trancount -- 1
+rollback transaction
+select @@trancount -- 0
+```
+- savepoint: save a point in the transaction
+``` sql
+begin transaction
+
+    update shop.product
+    set price = 100.00
+    where product_id = 1
+
+save transaction savepoint1
+
+    delete from shop.product
+    where product_id = 1
+
+rollback transaction savepoint1 -- rollback to savepoint1
+```
+
+- auto rollback: if an error occurs, the transaction will be rolled back
+``` sql
+begin transaction
+
+insert into shop.product
+values (20, 80.00, 50, 2)
+select @@trancount -- 1
+
+insert into shop.product
+values ('sql', 80.00, 100, 1)
+-- error: conversion failed when converting the nvarchar value 'sql' to data type int
+
+select @@trancount -- 0
+
+commit transaction -- will not be executed, transaction is rolled back
+```
