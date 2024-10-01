@@ -153,7 +153,10 @@ min(price)
 avg(distinct price)
 sum(price)
 from shop.product
+```
 
+## Window Functions
+``` sql
 select 
 row_number() over(order by price) as row_number, -- 1,2,3,4,5
 rank() over(order by price) as rank, -- 1,2,2,4,5
