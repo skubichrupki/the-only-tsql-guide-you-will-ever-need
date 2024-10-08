@@ -242,3 +242,21 @@ select @@trancount -- 0
 
 commit transaction -- will not be executed, transaction is rolled back
 ```
+
+## Procedures
+``` sql
+create procedure [dbo].[data_process]
+@process_id bigint,
+@process_date datetime2 = null -- default value null
+
+insert into [dbo].[table]
+	([process_id]
+	,[process_date]
+	,[log_date])
+values
+	(@process_id
+	,@process_date
+	,getdate())
+
+print('data processed');
+```
