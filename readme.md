@@ -245,6 +245,9 @@ commit transaction -- will not be executed, transaction is rolled back
 
 ## Procedures
 ``` sql
+AS
+BEGIN
+
 create procedure [dbo].[data_process]
 @process_id bigint,
 @process_date datetime2 = null -- default value null
@@ -259,4 +262,7 @@ values
 	,getdate())
 
 print('data processed');
+
+END
+GO
 ```
