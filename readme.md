@@ -48,6 +48,12 @@ drop schema shop
 drop database hatelovewear
 ```
 
+## Altering SQL objects
+``` sql
+alter table shop.product
+add [supplier_id] nvarchar(max)
+drop column [supplier_id]
+```
 
 ## Selecting data
 ``` sql
