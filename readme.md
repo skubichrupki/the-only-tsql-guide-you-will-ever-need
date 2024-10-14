@@ -53,6 +53,7 @@ drop database hatelovewear
 alter table shop.product
 add [supplier_id] nvarchar(max)
 drop column [supplier_id]
+alter column column_name datatype;
 ```
 
 ## Selecting data
