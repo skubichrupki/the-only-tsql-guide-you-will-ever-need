@@ -273,3 +273,10 @@ print('data processed');
 END
 GO
 ```
+
+## Identity Insert
+``` sql
+SET IDENTITY_INSERT [invoice].[docs_numerator_lkp] ON
+INSERT [dbo].[status] ([status_id], ... ) VALUES (5, ...)
+SET IDENTITY_INSERT [invoice].[docs_numerator_lkp] OFF
+```
