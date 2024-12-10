@@ -8,7 +8,7 @@
 - [Dynamic SQL](#Dynamic-SQL)
 - [Transactions](#Transactions)
 
-## Data Types
+## data types
 ``` sql
 - product_id int, bigint, smallint, tinyint -- whole number
 - price decimal(10,2) -- decimal number with 10 digits and 2 of them are after the decimal point
@@ -21,14 +21,13 @@
 - cursor -- iterates through a result set
 ```
 
-## Creating SQL objects
+## creating SQL objects
 ``` sql 
 create database hatelovewear
-
 use hatelovewear
-
 create schema shop
 ```
+
 ``` sql 
 create table shop.product (
     product_id int identity(1,1) primary key, -- auto increment by 1, starting from 1, unique and not null
@@ -41,14 +40,14 @@ create table shop.product (
 )
 ```
 
-## Dropping SQL objects
+## dropping SQL objects
 ``` sql
 drop table shop.product
 drop schema shop
 drop database hatelovewear
 ```
 
-## Altering SQL objects
+## altering SQL objects
 ``` sql
 alter table shop.product
 add [supplier_id] nvarchar(max)
@@ -56,14 +55,14 @@ drop column [supplier_id]
 alter column column_name datatype;
 ```
 
-## Selecting data
+## selecting data
 ``` sql
 select distinct product_id from shop.product
 ```
 
-## Inserting data
+## inserting data
 
-- Insert multiple rows
+- insert multiple rows
 ``` sql
 insert into shop.product 
 (name, price, quantity, size_id)
@@ -72,27 +71,27 @@ values
 ('sql', 80.00, 50, 2),
 ```
 
-- Backup table (if backup table exists)
+- backup table (if backup table exists)
 ``` sql
 insert into shop.product_archive 
 select * from shop.product
 where is_archived = 1
 ```
 
-- Backup table (if backup table doesnt exists)
+- backup table (if backup table doesnt exists)
 ``` sql
 select * into shop.product_backup 
 from shop.product
 ```
 
-## Updating data
+## updating data
 ``` sql
 update shop.product
 set price = 100.00
 where product_id = 1
 ```
 
-## Deleting data
+## deleting data
 ``` sql
 delete from shop.product
 where product_id = 1
@@ -101,7 +100,7 @@ where product_id = 1
 truncate table shop.product -- reset identity column
 ```
 
-## Variables
+## variables
 ``` sql
 declare @product_id int
 set @product_id = 1
@@ -129,28 +128,42 @@ declare @tmp_table table (product_id int, price decimal(10,2))
 ,PATINDEX('%[xwq]%', last_name) -- can USE wildcards % _ []
 ```
 
-## Case statement
-```sql
-case when @insert = 1 and @delete = 0 then 'insert'
-    when @insert = 0 and @delete = 1 then 'delete'
-    when @insert = 1 and @delete = 1 then 'update'
-else 'none' end as event
-```
-
-## CTE
+## math
 ``` sql
-with cte as (
-    select product_id,
-    size_id, 
-    sum(price) over(partition by size_id order by price) as total_price
-    from shop.product
-)
-
-select * from cte
-where total_price > 100
+,ABS(@amount) -- non negative VALUE
+,SIGN(@amount) -- RETURN -1,0,1 based IF negative
+,CEILING(@amount) -- rounds to TOP
+,FLOOR(@amount) -- rounds to bottom
+,ROUND(@amount, 2) -- rounds to 2 decimals
+,POWER(@amount, 3) -- ^3
+,SQUARE(@amount) -- ^2
+,SQRT(@amount) -- ^(1/2)
+,RAND() -- random FROM 0-1, can also be used IN ORDER BY to RETURN random ROWS
 ```
 
-## Aggregate Functions
+## dates and times
+```
+CAST(GETDATE() AS nvarchar(50)) AS string_date
+,CAST('420,69' AS DECIMAL(3,2)) AS string_to_decimal 
+,CONVERT(VARCHAR(20), birthdate, 11)
+,TRY_CONVERT(VARCHAR(20), birthdate, 11) -- nulls the values that didnt work in convert
+,CONVERT(DECIMAL(3,2), '420.69') AS string_to_decimal -- only IN SQL server
+,PARSE(birthdate AS DATE USING de-de)
+
+,GETDATE()
+,GETUTCDATE(), CURRENT_TIMESTAMP
+,SYSDATETIME(), SYSUTCDATETIME()
+,YEAR(@Date), MONTH(@Date), DAY(@Date) 
+,DATEPART(DAYOFYEAR, @Date)
+,DATENAME(WEEKDAY, @Date)
+,DATEADD(DAY, 14, @Date)
+,DATEDIFF(HOUR, @ins_date, GETDATE())
+
+,FORMAT(@Date, 'd', 'pl-PL'), FORMAT(@Date, 'dd-MM-YYYY'), FORMAT(123456, '-')
+,FORMAT(CAST('2018-01-01 14:00' AS datetime2), N'HH:mm') -- 14:00
+```
+
+## aggregate functions
 ``` sql
 select 
 count(*)
@@ -161,7 +174,7 @@ sum(price)
 from shop.product -- each can be a window function
 ```
 
-## Window Functions
+## window Functions
 ``` sql
 select 
 row_number() over(order by price) as row_number, -- 1,2,3,4,5
@@ -182,7 +195,28 @@ cume_dist() over(order by price) as cumulative_distribution -- 0.0, 0.25, 0.5...
 from shop.product
 ```
 
-## Merge
+## case statement
+```sql
+case when @insert = 1 and @delete = 0 then 'insert'
+    when @insert = 0 and @delete = 1 then 'delete'
+    when @insert = 1 and @delete = 1 then 'update'
+else 'none' end as event
+```
+
+## CTE
+``` sql
+with cte as (
+    select product_id,
+    size_id, 
+    sum(price) over(partition by size_id order by price) as total_price
+    from shop.product
+)
+
+select * from cte
+where total_price > 100
+```
+
+## merge
 ``` sql
 merge shop.product as target -- target table
 using stage.product as source -- source table 
@@ -195,7 +229,7 @@ insert (product_id, product_name)
 values (source.product_id, source.product_name); 
 ```
 
-## Dynamic SQL
+## dynamic SQL
 ``` sql
 declare @table_name = 'product' -- no need for single quotes
 declare @file_path = 'C:\Users\user\Documents\product.csv' -- need single quotes
@@ -211,7 +245,7 @@ set @sql = 'bulk insert etl.' + @table_name + ' from ''' + @file_path + ''''
 exec sp_executesql @sql
 ```
 
-## Transactions
+## transactions
 - commit transaction: save changes
 ``` sql
 begin transaction
@@ -269,7 +303,7 @@ select @@trancount -- 0
 commit transaction -- will not be executed, transaction is rolled back
 ```
 
-## Procedures
+## procedures
 ``` sql
 AS
 BEGIN
@@ -293,14 +327,14 @@ END
 GO
 ```
 
-## Identity Insert
+## identity Insert
 ``` sql
 SET IDENTITY_INSERT [invoice].[docs_numerator_lkp] ON
 INSERT [dbo].[status] ([status_id], ... ) VALUES (5, ...)
 SET IDENTITY_INSERT [invoice].[docs_numerator_lkp] OFF
 ```
 
-## Sequences
+## sequences
 ``` sql
 CREATE SEQUENCE order_seq
     AS INT
@@ -312,3 +346,15 @@ CREATE SEQUENCE order_seq
 INSERT INTO Orders (order_id, customer_id, order_date)
 VALUES (CONVERT(nvarchar, NEXT VALUE FOR order_seq) + '/' + YEAR(@date), '244', GETDATE());
 ```
+
+## query the system objects
+``` sql
+SELECT *
+FROM sys.objects AS obj
+INNER JOIN sys.sql_modules as mod
+ON obj.object_id = mod.object_id
+WHERE obj.type = 'V'
+AND mod.definition like '%MDMR%'
+```
+
+
