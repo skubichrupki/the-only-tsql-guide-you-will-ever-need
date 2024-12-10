@@ -110,6 +110,25 @@ declare @last_order = (select max(order_id) from shop.order)
 declare @tmp_table table (product_id int, price decimal(10,2))
 ```
 
+## strings
+``` sql
+,LEN(@string)
+,LOWER(@mystring) -- lowercase 
+,UPPER(@mystring) -- uppercase
+,LEFT(@mystring, 3) -- last 3 characters
+,RIGHT(@mystring, 3) -- first 3 characters
+,LTRIM(@string) -- trim from left
+,RTRIM(@string) -- trim from right
+,TRIM() -- trimming blanks
+,REPLACE('I LIKE pizza', 'pizza', 'burgir') -- i LIKE burgir
+,SUBSTRING('I LIKE pizza', 7, 5) -- pizza (position, numer of letters)
+,CONCAT('string1', 'string2'), CONCAT_WS(' ', 'string1', 'string2') -- IN ws you SELECT a separator
+,STRING_AGG(first_name, ',' ) WITHIN GROUP (ORDER BY first_name ASC) -- list of strings - useful WITH GROUP BY (YEAR for example)
+,STRING_AGG(CONCAT(first_name, CHAR(13))) -- carriage RETURN
+,CHARINDEX('pizza', 'i LIKE pizza AND burgir', 5) -- third parameter IS optional, USE > 0 OR = 0 (IN WHERE)
+,PATINDEX('%[xwq]%', last_name) -- can USE wildcards % _ []
+```
+
 ## Case statement
 ```sql
 case when @insert = 1 and @delete = 0 then 'insert'
